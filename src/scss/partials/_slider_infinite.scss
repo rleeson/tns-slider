@@ -1,0 +1,45 @@
+/* Slider Styles
+-------------------*/
+.slider-infinite {
+	padding: 0 8%;
+	position: relative;
+	width: 100%;
+	
+	.slide-mask {
+		overflow-x: hidden;
+	}
+	// Container for the slides and controls
+	.slider-body {
+		overflow-x: visible;
+		margin: 0;
+		padding: 0;
+		z-index: 5;
+		/* Keeps all slide (set as inline-block) on a single line */
+		white-space: nowrap;
+		/* Remove inline-block spacing */
+		word-spacing: -4px;
+		
+		// Container for each item/slides
+		.slide {
+			display: inline-block;
+			word-spacing: normal;
+			z-index: 1;
+		}
+	}
+	.slide-left,
+	.slide-right {
+		background-color: $grey-dark;
+		border: none 0;
+		bottom: 0;
+		position: absolute;
+		top: 0;
+		width: 8%;
+		z-index: 10;
+	}
+	.slide-left {
+		left: 0;
+	}
+	.slide-right {
+		right: 0;
+	}
+}

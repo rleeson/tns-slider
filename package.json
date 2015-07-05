@@ -1,0 +1,29 @@
+{
+  "name": "Things-and-Stuff-Slider",
+  "version": "1.0.0",
+  "description": " WordPress plugin to provide a slider of elements provided by a custom post type",
+  "main": "Gruntfile.js",
+  "dependencies": {
+    "grunt": "~0.4.5",
+    "grunt-concat": "~0.1.6",
+    "grunt-compass": "~0.3.9",
+    "grunt-contrib-cssmin": "~0.12.3",
+    "matchdep": "~0.3.0"
+  },
+  "devDependencies": {
+    "grunt-contrib-compass": "^1.0.3",
+    "grunt-contrib-cssmin": "^0.12.3",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-contrib-uglify": "^0.9.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "WordPress",
+    "Slider"
+  ],
+  "author": "Ryan Leeson",
+  "license": "GPL v2"
+}

@@ -1,0 +1,50 @@
+/**
+ * Base theme Bootstrap CSS
+ * 
+ * @since 1.0.0
+ * @package Things & Stuff
+ * @author Ryan Leeson
+ */
+/* Slider Styles
+-------------------*/
+.slider-infinite {
+  padding: 0 8%;
+  position: relative;
+  width: 100%;
+}
+.slider-infinite .slide-mask {
+  overflow-x: hidden;
+}
+.slider-infinite .slider-body {
+  overflow-x: visible;
+  margin: 0;
+  padding: 0;
+  z-index: 5;
+  /* Keeps all slide (set as inline-block) on a single line */
+  white-space: nowrap;
+  /* Remove inline-block spacing */
+  word-spacing: -4px;
+}
+.slider-infinite .slider-body .slide {
+  display: inline-block;
+  word-spacing: normal;
+  z-index: 1;
+}
+.slider-infinite .slide-left,
+.slider-infinite .slide-right {
+  background-color: #333;
+  border: none 0;
+  bottom: 0;
+  position: absolute;
+  top: 0;
+  width: 8%;
+  z-index: 10;
+}
+.slider-infinite .slide-left {
+  left: 0;
+}
+.slider-infinite .slide-right {
+  right: 0;
+}
+
+/*# sourceMappingURL=main.css.map */

@@ -1,0 +1,15 @@
+/**
+ * Base theme Bootstrap CSS
+ * 
+ * @since 1.0.0
+ * @package Things & Stuff
+ * @author Ryan Leeson
+ */
+
+// Import base Bootstrap Variables and Mixins
+@import 'compass';
+@import 'compass/css3';
+
+// Base theme specific partials
+@import 'partials/variables_mixins';
+@import 'partials/slider_infinite';
