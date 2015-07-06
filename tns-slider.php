@@ -9,6 +9,8 @@
  * License: GPLv2
  */
 
+define( 'TNS_SLIDER_DIR', plugin_dir_url( __FILE__ ) );
+
 require_once( __DIR__ . '/classes/tns-slider-core.php' );
 
 global $tns_slider;

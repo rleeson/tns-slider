@@ -1,5 +1,5 @@
 /**
- * Core JS File
+ * Infinite Slider JS Prototype
  */
 
 var console = console || { log: function( e ) { return; } };
@@ -9,7 +9,8 @@ var tns 	= tns || {};
 tns.slider_infinite = function( $, _ ) {
 	var base_element	= null,
 		base_selector	= '',
-		element_count	= 0,
+		element_count	= false,
+		ie_version		= 0,
 		index			= 0,
 		max_index		= 0,
 		outer_width		= 0,
@@ -27,6 +28,13 @@ tns.slider_infinite = function( $, _ ) {
 		if ( typeof base !== 'string' || base === '' ) {
 			return false;
 		}
+		
+		this.ie_version	= check_ie();
+		if ( this.ie_version && this.ie_version < 9 ) {
+			debug.log( 'Incompatible version of IE (less than 9), slider will not load' );
+			return false;
+		}
+
 		this.base_selector		= base;
 		this.base_element		= $( this.base_selector + ' .slide-mask' );
 		this.slider_body		= this.base_element.find( '.slider-body' );
@@ -41,6 +49,11 @@ tns.slider_infinite = function( $, _ ) {
 
 		return slider_setup();
 	}
+	// Check IE version number 
+	function check_ie() {
+		  var myNav = navigator.userAgent.toLowerCase();
+		  return ( myNav.indexOf( 'msie' ) != -1 ) ? parseInt( myNav.split( 'msie' )[ 1 ] ) : false;
+		}
 	/**
 	 * Bind slider left and right controls
 	 */
@@ -53,7 +66,7 @@ tns.slider_infinite = function( $, _ ) {
 					slider.index = slider.index - 1;
 				}
 				else if ( slider.index === 0 ) {
-					slider.index = slider.max_index;
+					slider.index = slider.max_index - 1;
 				}
 				update_index( slider.index );
 			} 
@@ -64,15 +77,6 @@ tns.slider_infinite = function( $, _ ) {
 				var slider = e.data.slider;
 				if ( slider.index < slider.max_index - 1 ) {
 					slider.index = slider.index + 1;
-					
-					if ( slider.index == slider.max_index - 1 ) {
-						var remainder = slider.element_count % slider.slides_visible;
-						debug.log( remainder );
-						if ( remainder > 0 ) {
-							update_index( ( slider.index - ( remainder / slider.slides_visible ) ) );
-							return;
-						}
-					}
 				}
 				else if ( slider.index == slider.max_index - 1 ) {
 					slider.index = 0;
@@ -91,16 +95,18 @@ tns.slider_infinite = function( $, _ ) {
 		this.outer_width	= this.slider_body.width();
 		this.slide_width	= $( this.slider_elements.get( 0 ) ).width();
 		
-		// Make sure the slider width is evenly divided into slides, tolerance of one-hundreth of a slide
+		// Divide the slider width is evenly divided into slides
 		var slides_shown	= this.outer_width / this.slide_width
 		this.slides_visible	= Math.ceil( slides_shown );
 		var width_variance	= this.slides_visible - slides_shown
 		debug.log( 'Slide width variance: ' + width_variance );
 
+		// Ensure tolerance with one-hundreth of a slide
 		if ( width_variance < 0.99 && width_variance > 0.01 ) {
 			debug.log( 'Slide alignment is off, partial slide shown in slider.' );
 			return false;
 		}
+		// In case the width was slightly more, the ceil() would add an extra slide
 		else if ( width_variance < 1 && width_variance > 0.99 ) {
 			this.slides_visible--;
 		}
@@ -130,12 +136,26 @@ tns.slider_infinite = function( $, _ ) {
 	 */
 	function update_index( index ) {
 		var slide_position = 0;
-		if ( typeof index === 'number' && index > 0 ) { 
+		if ( typeof index === 'number' && index > 0 ) {
+			if ( index == this.max_index - 1 ) {
+				var remainder = this.element_count % this.slides_visible;
+				debug.log( remainder );
+				if ( remainder > 0 ) {
+					index = index - ( remainder / this.slides_visible );
+				}
+			}
 			slide_position = index * -100 + '%';
 		}
-		var translation = 'translate3d(' + slide_position + ', 0, 0 )';
-		debug.log( translation );
-		this.slider_body.css( 'transform', translation );
+		var translation		= 'translate3d( ' + slide_position + ', 0, 0 )',
+			ms_translation	= 'translate(' + slide_position + ', 0)';
+		debug.log( 'Standard: ' + translation );
+		debug.log( 'Microsoft: ' + ms_translation );
+		if ( this.ie_version && this.ie_version == 9 ) {
+			this.slider_body.css( 'transform', ms_translation );
+		}
+		else {
+			this.slider_body.css( 'transform', translation );
+		}
 	}
 	return {
 		init: function( base ) {
