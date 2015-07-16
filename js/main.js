@@ -50,49 +50,6 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 			return slider_setup( settings );
 		}
 		/**
-		 * Update the slider position based on a supplied index
-		 * 
-		 * @param number index Number which is multiplied to a negative horizontal percentage position
-		 */
-		function update_index( settings, index ) {
-			var slide_position = 0;
-			
-			// Calculate non-zero index
-			if ( typeof index === 'number' && index > 0 ) {
-				// Handle last visible pane display
-				if ( index == settings.max_index - 1 ) {
-					// Adjust partial index based on uneven visible slides / total slides ratio
-					var remainder = settings.element_count % settings.slides_visible;
-					debug.log( remainder );
-					if ( remainder > 0 ) {
-						index = index - ( remainder / settings.slides_visible );
-					}
-				}
-				if ( settings.element_last && ( settings.element_count > settings.slides_visible + 1 ) ) {
-					index = index + ( 1 / settings.slides_visible );
-				}
-				slide_position = index * -100 + '%';
-			}
-			// Prepend the last element before the slider, if scrolling and it's not a duplicate of an visible slide
-			if ( index === 0 && settings.container.hasClass( 'scrolling' ) ) {
-				if ( settings.element_last && ( settings.element_count > settings.slides_visible + 1 ) ) {
-					slide_position = ( 1 / settings.slides_visible ) * -100 + '%';
-				}
-			} 
-			
-			// Create 2D translation for IE9, 3D translation for all others
-			var translation		= 'translate3d( ' + slide_position + ', 0, 0 )',
-				ms_translation	= 'translate(' + slide_position + ', 0)';
-			if ( settings.ie_version && settings.ie_version == 9 ) {
-				debug.log( 'Microsoft: ' + ms_translation );
-				settings.slider_body.css( 'transform', ms_translation );
-			}
-			else {
-				debug.log( 'Standard: ' + translation );
-				settings.slider_body.css( 'transform', translation );
-			}
-		}
-		/**
 		 * Setup slider properties based on slider and individual slide widths
 		 * Registers a resize event to handle viewport size changes
 		 */
@@ -119,7 +76,7 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 			}
 			
 			settings.max_index	= Math.ceil( settings.element_count / settings.slides_visible );
-			update_index( settings, 0 );
+			update_index( settings );
 			
 			// Property debug detail
 			debug.log( 'Slider width: '			+ settings.outer_width );
@@ -131,10 +88,55 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 			
 			// Reset parameters on resizes (delay of 1000ms)
 			$( window ).resize( _.debounce( function() {
-				slider_setup( settings );
+				return slider_setup( settings );
 			}, 1000 ) );
 			
 			return settings;
+		}
+		/**
+		 * Update the slider position based on a supplied index
+		 * 
+		 * @param number index Number which is multiplied to a negative horizontal percentage position
+		 */
+		function update_index( settings ) {
+			var slide_position = 0;
+			
+			// Calculate non-zero index
+			if ( typeof settings.index === 'number' && settings.index > 0 ) {
+				// Handle last visible pane display
+				if ( settings.index == settings.max_index - 1 ) {
+					// Adjust partial index based on uneven visible slides / total slides ratio
+					var remainder = settings.element_count % settings.slides_visible;
+					debug.log( remainder );
+					if ( remainder > 0 ) {
+						settings.index = settings.index - ( remainder / settings.slides_visible );
+					}
+				}
+				if ( settings.element_last && ( settings.element_count > settings.slides_visible + 1 ) ) {
+					settings.index = settings.index + ( 1 / settings.slides_visible );
+				}
+				slide_position = settings.index * -100 + '%';
+			}
+			// Prepend the last element before the slider, if scrolling and it's not a duplicate of an visible slide
+			if ( settings.index === 0 && settings.container.hasClass( 'scrolling' ) ) {
+				if ( settings.element_last && ( settings.element_count > settings.slides_visible + 1 ) ) {
+					slide_position = ( 1 / settings.slides_visible ) * -100 + '%';
+				}
+			} 
+			
+			// Create 2D translation for IE9, 3D translation for all others
+			var translation		= 'translate3d( ' + slide_position + ', 0, 0 )',
+				ms_translation	= 'translate(' + slide_position + ', 0)';
+			if ( settings.ie_version && settings.ie_version == 9 ) {
+				debug.log( 'Microsoft: ' + ms_translation );
+				settings.slider_body.css( 'transform', ms_translation );
+			}
+			else {
+				debug.log( 'Standard: ' + translation );
+				debug.log( settings );
+				debug.log( settings.slider_body );
+				settings.slider_body.css( 'transform', translation );
+			}
 		}
 		/**
 		 * Bind slider left and right controls
@@ -153,13 +155,13 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 					
 					// On first scroll event, setup scrolling
 					if ( slider.scrolling === false ) {
-						scroll_setup( settings );
+						scroll_setup( slider );
 					}
-					update_index( slider.index );
+					update_index( slider );
 				} 
 			);
 			settings.base_element.children( '.slide-right' ).on( 'click',
-				{ slider: instance },
+				{ slider: settings },
 				function ( e ) {
 					var slider = e.data.slider;
 					if ( slider.index < slider.max_index - 1 ) {
@@ -171,9 +173,9 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 	
 					// On first scroll event, setup scrolling
 					if ( slider.scrolling === false ) {
-						scroll_setup( settings );
+						scroll_setup( slider );
 					}
-					update_index( slider.index );
+					update_index( slider );
 				} 
 			);
 		}
@@ -213,9 +215,8 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 				},
 				settings = $.extend( {}, defaults, options );
 			
-			settings = base_properties( this, settings );
-			
 			// Verify slider setup before initializing controls
+			settings = base_properties( this, settings );
 			if ( settings === false ) {
 				debug.log( 'Problem initializing slider: ' + this );
 				return;
