@@ -15,7 +15,7 @@ class TNS_Slider {
 	}
 	
 	public function script_load() {
-		wp_enqueue_style( 'tns-slider-main', plugins_url( 'tns-slider/css' ) . '/main.css' );
-		wp_enqueue_script( 'tns-slider-main-js', plugins_url( 'tns-slider/js') . '/main.js', array( 'jquery' ), '1.0.0', true );
+		wp_enqueue_style( 'tns-slider-main', TNS_SLIDER_DIR . '/css/main.css' );
+		wp_enqueue_script( 'tns-slider-main-js', TNS_SLIDER_DIR . '/js/main.js', array( 'jquery', 'underscore' ), '1.0.0', true );
 	}
 }
