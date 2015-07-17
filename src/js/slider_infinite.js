@@ -83,8 +83,8 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 			debug.log( 'Number of Slides: '		+ settings.element_count );
 			debug.log( 'Slide width: '			+ settings.slide_width );
 			debug.log( 'Slides per window: '	+ settings.slides_visible );
-			debug.log( 'Current slides: '		+ settings.index );
-			debug.log( 'Max slides: '			+ settings.max_index );
+			debug.log( 'Current window: '		+ settings.index );
+			debug.log( 'Max windows: '			+ settings.max_index );
 			
 			// Reset parameters on resizes (delay of 1000ms)
 			$( window ).resize( _.debounce( function() {
@@ -99,28 +99,30 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 		 * @param number index Number which is multiplied to a negative horizontal percentage position
 		 */
 		function update_index( settings ) {
-			var slide_position = 0;
+			var slide_position = settings.index,
+				remainder = settings.element_count % settings.slides_visible;
+
+			debug.log( 'Initial slide position: ' + slide_position );
+			debug.log( 'Total/Visual Element Remainder: ' + remainder );
 			
-			// Calculate non-zero index
+			// Process scrolled window indexes
 			if ( typeof settings.index === 'number' && settings.index > 0 ) {
 				// Handle last visible pane display
-				if ( settings.index == settings.max_index - 1 ) {
+				if ( settings.index >= settings.max_index - 1 ) {
 					// Adjust partial index based on uneven visible slides / total slides ratio
-					var remainder = settings.element_count % settings.slides_visible;
-					debug.log( remainder );
 					if ( remainder > 0 ) {
-						settings.index = settings.index - ( remainder / settings.slides_visible );
+						slide_position = slide_position - ( settings.slides_visible - remainder ) / settings.slides_visible;
 					}
 				}
-				if ( settings.element_last && ( settings.element_count > settings.slides_visible + 1 ) ) {
-					settings.index = settings.index + ( 1 / settings.slides_visible );
+				if ( settings.element_last && ( settings.element_count >= settings.slides_visible + 1 ) ) {
+					slide_position = slide_position + ( 1 / settings.slides_visible );
 				}
-				slide_position = settings.index * -100 + '%';
+				slide_position = slide_position * -100 + '%';
 			}
-			// Prepend the last element before the slider, if scrolling and it's not a duplicate of an visible slide
-			if ( settings.index === 0 && settings.container.hasClass( 'scrolling' ) ) {
-				if ( settings.element_last && ( settings.element_count > settings.slides_visible + 1 ) ) {
-					slide_position = ( 1 / settings.slides_visible ) * -100 + '%';
+			// Process the first window
+			else if ( settings.index <= 0 && settings.container.hasClass( 'scrolling' ) ) {
+				if ( settings.element_last && ( settings.element_count >= settings.slides_visible + 1 ) ) {
+					slide_position = ( ( 1 / settings.slides_visible ) * -100 ) + '%';
 				}
 			} 
 			
@@ -133,8 +135,6 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 			}
 			else {
 				debug.log( 'Standard: ' + translation );
-				debug.log( settings );
-				debug.log( settings.slider_body );
 				settings.slider_body.css( 'transform', translation );
 			}
 		}
@@ -146,12 +146,15 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 				{ slider: settings },
 				function ( e ) {
 					var slider = e.data.slider;
+					
+					debug.log( 'Index before: ' + slider.index );
 					if ( slider.index > 0 ) {
 						slider.index = slider.index - 1;
 					}
-					else if ( slider.index === 0 ) {
+					else if ( slider.index <= 0 ) {
 						slider.index = slider.max_index - 1;
 					}
+					debug.log( 'Index after: ' + slider.index );
 					
 					// On first scroll event, setup scrolling
 					if ( slider.scrolling === false ) {
@@ -164,12 +167,15 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 				{ slider: settings },
 				function ( e ) {
 					var slider = e.data.slider;
+
+					debug.log( 'Index before: ' + slider.index );
 					if ( slider.index < slider.max_index - 1 ) {
 						slider.index = slider.index + 1;
 					}
-					else if ( slider.index == slider.max_index - 1 ) {
+					else if ( slider.index >= slider.max_index - 1 ) {
 						slider.index = 0;
 					}
+					debug.log( 'Index after: ' + slider.index );
 	
 					// On first scroll event, setup scrolling
 					if ( slider.scrolling === false ) {
@@ -183,9 +189,9 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 			// Latch scrolling and setup scroll actions
 			settings.scrolling = true;
 			settings.container.addClass( 'scrolling' );
-			
+
 			// Add edge wrapping elements if there are enough slides
-			if ( settings.element_count > settings.slides_visible + 1 ) {
+			if ( settings.element_count >= settings.slides_visible + 1 ) {
 				if ( settings.element_first ) {
 					settings.slider_body.append( settings.element_first );
 				}
