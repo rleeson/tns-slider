@@ -3,7 +3,7 @@
  */
 
 var console = console || { log: function( e ) { return; } };
-var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) { console.log( e ) } } }; 
+var debug	= debug || { enabled: false, log: function( e ) { if ( this.enabled ) { console.log( e ) } } }; 
 
 (function ( $ ) {
 	$.fn.infiniteSlider = function( base ) {
@@ -42,10 +42,12 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 				return false;
 			}
 	
-			settings.element_first	= $( settings.slider_elements.get( 0 ) ).clone().addClass( 'slide-temp' );
-			settings.element_last	= $( settings.slider_elements.get( settings.element_count - 1 ) ).clone().addClass( 'slide-temp' );
-			debug.log( 'First: ' + settings.element_first );
-			debug.log( 'Last: ' + settings.element_last );
+			if ( settings.overflow === true ) {
+				settings.element_first	= $( settings.slider_elements.get( 0 ) ).clone().addClass( 'slide-temp' );
+				settings.element_last	= $( settings.slider_elements.get( settings.element_count - 1 ) ).clone().addClass( 'slide-temp' );
+				debug.log( 'First: ' + settings.element_first );
+				debug.log( 'Last: ' + settings.element_last );
+			}
 			
 			return slider_setup( settings );
 		}
@@ -201,7 +203,7 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 			}
 	
 		}
-		return this.each( function( options ) {
+		return this.each( function() {
 			var defaults = {
 					base_element	: null,
 					container		: null,
@@ -212,6 +214,7 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 					index			: 0,
 					max_index		: 0,
 					outer_width		: 0,
+					overflow		: true,
 					scrolling		: false,
 					slide_percent	: 0,
 					slide_width		: 0,
@@ -219,8 +222,8 @@ var debug	= debug || { enabled: true, log: function( e ) { if ( this.enabled ) {
 					slider_body		: null,
 					slides_visible	: 0
 				},
-				settings = $.extend( {}, defaults, options );
-			
+				settings = $.extend( {}, defaults, base );
+
 			// Verify slider setup before initializing controls
 			settings = base_properties( this, settings );
 			if ( settings === false ) {
